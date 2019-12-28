@@ -1,0 +1,8 @@
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\bin\Debug\netstandard2.0\ElementsTree.deps.json
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\bin\Debug\netstandard2.0\ElementsTree.dll
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\bin\Debug\netstandard2.0\ElementsTree.pdb
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\obj\Debug\netstandard2.0\ElementsTree.csprojAssemblyReference.cache
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\obj\Debug\netstandard2.0\ElementsTree.AssemblyInfoInputs.cache
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\obj\Debug\netstandard2.0\ElementsTree.AssemblyInfo.cs
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\obj\Debug\netstandard2.0\ElementsTree.dll
+C:\Users\Tervin\Source\Repos\ElementsTree\ElementsTree\obj\Debug\netstandard2.0\ElementsTree.pdb

@@ -1,0 +1,159 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div>
+    <div class="trees-height row">
+        <div class="column">
+            <div>User tree</div>
+            <div id="CachedTreeView" class="tree-container"></div>
+        </div>
+        <div class="column vertical-center">
+            <input type="button" id="copyItem" value="&#60;&#60;&#60;" />
+        </div>
+        <div class="column">
+            <div>Data base tree</div>
+            <div id="DBTreeView" class="tree-container "></div>
+        </div>
+    </div>
+    <div>
+        <input type="button" id="applyItems" value="Apply" />
+        <input type="button" id="resetItem" value="Reset" />
+    </div>
+</div>
+
+<script src="~/node_modules/jquery/dist/jquery.min.js"></script>
+<script src="~/node_modules/jstree/dist/jstree.js"></script>
+
+<script type='text/javascript'>
+    $(document).ready(function ($) {
+
+        var dbTreeJSON = @Html.Raw(JsonConvert.SerializeObject(ViewBag.dbTreeJSON));
+        var localTreeJSON = @Html.Raw(JsonConvert.SerializeObject(ViewBag.localTreeJSON));
+
+        var dbTreeView = $('#DBTreeView').jstree({
+            core: {
+                data: dbTreeJSON,
+                themes: {
+                    icons: true
+                }
+            },
+        });
+        var cachedTreeView = $('#CachedTreeView').jstree({
+            core: {
+                multiple: false,
+                data: localTreeJSON,
+                check_callback: true,
+                themes: {
+                    url: true,
+                    icons: true
+                }
+            },
+            plugins: ["contextmenu", "types"],
+            contextmenu: {
+                items: function ($node) {
+                    var userTree = $("#CachedTreeView").jstree(true);
+                    if ($node.state.disabled)
+                        return;
+                    return {
+                        Create: {
+                            separator_before: false,
+                            separator_after: false,
+                            label: "Create",
+                            action: function () {
+                                var parentId = $node.id;
+                                userTree.create_node($node, undefined, undefined, function (e) {
+                                    $.ajax({
+                                        url: '@Url.Action("Add")',
+                                        type: 'POST',
+                                        data: { value: e.text, parentId: parentId },
+                                        success: function (response) { successDefault(response); }
+                                    });
+                                });
+                            }
+                        },
+                        Rename: {
+                            separator_before: false,
+                            separator_after: false,
+                            label: "Rename",
+                            action: function () {
+                                userTree.edit($node);
+                            }
+                        },
+                        Remove: {
+                            separator_before: false,
+                            separator_after: false,
+                            label: "Remove",
+                            action: function () {
+                                $.ajax({
+                                    url: '@Url.Action("Remove")',
+                                    type: 'POST',
+                                    data: { nodeId: $node.id },
+                                    success: function (response) {
+                                        successDefault(response);
+                                    }
+                                });
+                            }
+                        }
+                    };
+                }
+            }
+        }).on('rename_node.jstree', function (e, data) {
+            $.ajax({
+                url: '@Url.Action("Edit")',
+                type: 'POST',
+                data: { nodeId: data.node.id, newValue: data.text },
+                success: function (response) {
+                    if (!response.success) {
+                        alert(response.responseText);
+                        window.location.reload();
+                    }
+                }
+            });
+        }).on("keydown", ".jstree-rename-input", function (e) {
+            $('.jstree-rename-input').attr('maxLength', 10);
+        });
+
+        $("#copyItem").click(function (e) {
+
+            var selNodeId = dbTreeView.jstree("get_selected");
+
+            if (selNodeId.length !== 0)
+                $.ajax({
+                    url: '@Url.Action("CopyFromDb")',
+                    type: 'POST',
+                    data: { dbNodeId: selNodeId },
+                    success: function (response) { successDefault(response); }
+                });
+            return false;
+        });
+        $("#applyItems").click(function (e) {
+
+            $.ajax({
+                url: '@Url.Action("Apply")',
+                type: 'POST',
+                success: function (response) { window.location.reload(); }
+            });
+            return false;
+        });
+        $("#resetItem").click(function (e) {
+
+            $.ajax({
+                url: '@Url.Action("Reset")',
+                type: 'POST',
+                success: function (response) { window.location.reload(); }
+            });
+
+            return false;
+        });
+
+        function successDefault(response) {
+            if (response.success) {
+                cachedTreeView.jstree(true).settings.core.data = response.localTreeJSON;
+                cachedTreeView.jstree(true).refresh();
+            }
+            else
+                alert(response.responseText);
+        }
+    });
+</script>
