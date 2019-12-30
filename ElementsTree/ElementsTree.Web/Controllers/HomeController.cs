@@ -9,7 +9,7 @@ namespace ElementsTree.Web.Controllers
     public class HomeController : Controller
     {
         private readonly Tree dbTree;
-        private readonly Tree localTree;
+        private Tree localTree;
         private readonly IMemoryCache _cache;
 
         public HomeController(IMemoryCache memoryCache)
@@ -102,14 +102,26 @@ namespace ElementsTree.Web.Controllers
         {
             try
             {
-                dbTree.UpdateTree(localTree.GetForest());
+                var treeNodeForUpdate = localTree.GetForest();
+                dbTree.UpdateTree(treeNodeForUpdate);
+
+                //Обновление локального кеша из БД
+                localTree = new Tree();
+                _cache.Set(Properties.Resources.StrLocalTree, localTree);
+                foreach (var node in treeNodeForUpdate)
+                {
+                    var dbNode = dbTree.GetNode(node.Id);
+                    if (dbNode == null)
+                        continue;
+
+                    localTree.AddNode(node.Id, dbNode.Parent?.Id, dbNode.Value, dbNode.IsDeleted, dbNode.Childrens.Select(x => x.Id).ToList());
+                }
             }
             catch (TreeException ex)
             {
                 return new JsonResult(new { success = false, responseText = ex.Message });
             }
 
-            //_cache.Set(Properties.Resources.StrLocalTree, new Tree());
             return new JsonResult(new { success = true, localTreeJSON = TreeConverter.TreeToTreeNodeModelList(localTree) });
         }
 
