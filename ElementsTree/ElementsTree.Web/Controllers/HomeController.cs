@@ -109,7 +109,7 @@ namespace ElementsTree.Web.Controllers
                 return new JsonResult(new { success = false, responseText = ex.Message });
             }
 
-            _cache.Set(Properties.Resources.StrLocalTree, new Tree());
+            //_cache.Set(Properties.Resources.StrLocalTree, new Tree());
             return new JsonResult(new { success = true, localTreeJSON = TreeConverter.TreeToTreeNodeModelList(localTree) });
         }
 
